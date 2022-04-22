@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model KnexMigrations {
+  id             Int      @id @default(autoincrement()) @db.UnsignedInt
+  name           String?  @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime @default(now()) @db.Timestamp(0)
+}
+
+model KnexMigrations_lock {
+  index     Int  @id @default(autoincrement()) @db.UnsignedInt
+  is_locked Int?
+}
+
+model Post {
+  id        Int      @id @default(autoincrement()) @db.UnsignedInt
+  title     String   @db.VarChar(255)
+  content   String?  @db.VarChar(255)
+  published Boolean  @default(false)
+  viewCount Int      @default(0)
+  createdAt DateTime @default(now()) @db.Timestamp(0)
+  updatedAt DateTime @default(now()) @db.Timestamp(0)
+  authorId  Int?     @db.UnsignedInt
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: Restrict, onUpdate: Restrict, map: "post_authorid_foreign")
+
+  @@index([authorId], map: "post_authorid_index")
+}
+
+model User {
+  id    Int     @id @default(autoincrement()) @db.UnsignedInt
+  email String  @unique(map: "user_email_unique") @db.VarChar(255)
+  name  String? @db.VarChar(255)
+  posts Post[]
+}
